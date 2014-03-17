@@ -1,0 +1,122 @@
+#!/bin/bash
+
+function worked {
+	if (( $1 == 0 ))
+	then
+		echo -n "[ OK  ]	"
+	else
+		echo -n "[ NOK ]	"
+	fi
+}
+
+function ncCheck {
+	ip="$1"
+	port="$2"
+	proto="$3"
+	options="-z$proto -w 3"
+	nc $options $ip $port >/dev/null 2>&1
+	worked $?
+	echo -n "$ip on port $port"
+	if [[ $proto == "u" ]]
+	then
+		echo " UDP"
+	else
+		echo ""
+	fi
+}
+
+function webCheck {
+	site=$1
+	curl --connect-timeout 3 -I "$site" 2>&1 | grep "HTTP/1.1 200 OK" >/dev/null 2>&1
+	worked $?
+	echo "$site"
+}
+
+# Values to test
+urls="http://mirrors.manchester.m247.com/centos/6/os/x86_64/
+http://www.mirrorservice.org/sites/mirror.centos.org/6/os/x86_64/
+http://centos.hyve.com/6/os/x86_64/
+http://mirror.synergyworks.co.uk/centos/6/os/x86_64/
+http://mirrors.vooservers.com/centos/6/os/x86_64/
+http://mirror.krystal.co.uk/centos/6/os/x86_64/
+http://mirrors.ukfast.co.uk/sites/ftp.centos.org/6/os/x86_64/
+http://mirror.mhd.uk.as44574.net/mirror.centos.org/6/os/x86_64/
+http://mirrors.melbourne.co.uk/sites/ftp.centos.org/centos/6/os/x86_64/
+http://mirror.sov.uk.goscomb.net/centos/6/os/x86_64/"
+
+DNSips="156.154.70.10
+156.154.71.10
+10.144.127.198
+10.192.124.198"
+
+gitHub="22
+80
+443
+9418"
+
+gMail="itv.com.s200a1.psmtp.com
+itv.com.s200a2.psmtp.com
+itv.com.s200b1.psmtp.com
+itv.com.s200b2.psmtp.com
+alt1.gmr-smtp-in.l.google.com
+alt2.gmr-smtp-in.l.google.com
+gmr-smtp-in.l.google.com"
+
+outsideWorld="www.itv.com
+www.github.com
+www.dropbox.com
+www.weather.com
+www.tesco.com"
+
+function outBound {
+	# Outbound Tests
+	echo "Performing YUM repo check"
+	for line in $urls
+	do
+		webCheck $line
+	done
+
+	echo "Performing DNS check"
+	for line in $DNSips
+	do
+		ncCheck "$line" 53 
+	done
+
+	echo "Git Hub Checks"
+	for line in $gitHub
+	do
+		ncCheck github.com $line
+	done
+
+	echo "Random Web Connections"
+	for line in $outsideWorld
+	do
+		ncCheck $line 80
+		ncCheck "$line" 443
+	done
+
+	echo "Google Mail Server Check"
+	for line in $gMail
+	do
+		ncCheck "$line" 25
+	done
+}
+
+function inBound {
+	ncCheck $1 22
+	ncCheck $1 53
+	ncCheck $1 53 u
+	ncCheck $1 80
+	ncCheck $1 443
+	ncCheck $1 903
+	ncCheck $1 324
+	ncCheck $1 194 u
+	ncCheck $1 903 u
+}
+
+if [[ $1 == OUT ]]
+then
+	outBound
+else
+	inBound $1
+fi
