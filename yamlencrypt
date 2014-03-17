@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if (( $# < 2 ))
+then
+	echo "1st param is the gpg file to create/add, 2nd param is the yaml file to encrypt"
+	exit 1
+fi
+gpg --encrypt -o "$1" --trust-model always -r "ITV Ops (Puppet hiera key) <bboperations@itv.com>" "$2"

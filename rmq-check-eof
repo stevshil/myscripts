@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while :
+do
+	echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+	ssh back-jes-001 'sudo grep EOF /var/log/dawkins_updates/*.log'
+	sleep 1800
+done

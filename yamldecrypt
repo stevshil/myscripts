@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+	echo "Enter name of the gpg file without the extension"
+	exit 1
+fi
+
+gpg --decrypt -o "$1.$LOGNAME-output" "$1".gpg

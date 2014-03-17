@@ -1,0 +1,1 @@
+/usr/bin/puppet apply --debug --verbose --manifestdir=/vagrant/linux_puppet/puppet/itv.com/manifests --modulepath=/vagrant/linux_puppet/puppet/itv.com/modules --fileserverconfig=/vagrant/linux_puppet/puppet/fileserver.conf /vagrant/manifests/pt.pp

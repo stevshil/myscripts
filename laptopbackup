@@ -1,0 +1,21 @@
+#!/bin/bash
+
+cd ~/dev_environment
+files=`git status | egrep '(/|modified:)' | grep '\t' | sed 's,^#		*\(modified:  *\)*,dev_environment/,' | sed 's/(.*$//'`
+cd ~/dev_environment/linux_puppet
+files2=`git status | egrep '(/|modified:)' | grep '\t' | sed 's,^#		*\(modified:  *\)*,dev_environment/linux_puppet/,' | sed 's/(.*$//'`
+filelist=`echo "$files $files2" | tr '\n' ' '`
+
+cd
+for file in $filelist
+do
+	if [ -f "$file" ]
+	then
+		backuplist="$backuplist $file"
+	fi
+done
+
+#echo $backuplist
+tar zcvf Google\ Drive/puppet.bkp.tgz $backuplist
+
+tar zcvf Google\ Drive/firefox.bkp.tgz Library/Application\ Support/Firefox/Profiles/0ck1yx44.default/
