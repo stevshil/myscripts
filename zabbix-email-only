@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+	userlevel=0
+	while (( $userlevel != 1 )) && (( $userlevel != 3 ))
+	do
+		echo "What user level are these users?"
+		echo "Ordinary user = 1"
+		echo "Admin = 3"
+		echo -n "Choice> "
+		read userlevel
+	done
+fi
+
+echo -n "Please enter root's password for MySQL: "
+stty -echo
+read rootpw
+stty echo
+
+while read -r user
+do
+	# Get User data for 4x4 from LDAP
+	data=$(ldapsearch -b "dc=o,dc=itv,dc=net,dc=uk" -x | sed -n "/^dn: uid=$user/,/givenName/p" | egrep '(^mail|^givenName|^sn)')
+
+	alias="$user"
+	name=$(echo "$data" | grep '^givenName:' | sed 's/^.*: //')
+	surname=$(echo "$data" | grep '^sn:' | sed 's/^.*: //')
+	sendto=$(echo "$data" | grep '^mail:' | sed 's/^.*: //')
+
+	#echo -e "$alias\n$name\n$surname\n$sendto"
+	# Check all data exists before we commit
+	if [[ -z $alias || -z $name || -z $surname || -z $sendto ]]
+	then
+		echo -e "\033[0;31m[ NOK! ]\033[0m	$user"
+		continue
+	else
+		echo -e "\033[0;32m[  OK  ]\033[0m	$user"
+	fi
+
+	# Now we have the data populate Zabbix
+	if echo "$sendto" | grep -v '^[ 	]*$' >/dev/null 2>&1
+	then
+		# Get next users ID
+		uid=$(echo "SELECT userid FROM users WHERE name='$name';" | mysql zabbix -u root -p$rootpw | tail -1)
+	fi
+
+		# Get next available mediaid
+		mid=$(echo "SELECT max(mediaid)+1 FROM media;" | mysql zabbix -u root -p$rootpw | tail -1)
+		# Create the Email setting
+		echo "INSERT INTO media (mediaid,userid,mediatypeid,sendto,active,severity) VALUES ($mid,$uid,1,'$sendto',0,52)" | mysql zabbix -u root -p$rootpw
+
+done <userlist
