@@ -111,6 +111,13 @@ function outBound {
 			IFS="/"
 			echo "$line" | while read port proto
 			do
+				if [[ $proto == udp ]]
+				then
+					proto='u'
+				else
+					proto=''
+				fi
+
 				ncCheck $remoteHost $port $proto
 			done
 			IFS="$OIFS"
