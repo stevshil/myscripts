@@ -1,0 +1,47 @@
+#!/bin/bash
+
+function ncCheck {
+	ip="$1"
+	port="$2"
+	proto="$3"
+	if [[ $proto == 'u' ]]
+	then
+		nc -klu $ip $port >/dev/null 2>&1
+	else
+		nc -kl $ip $port >/dev/null 2>&1
+	fi
+	echo -n "Listening on port $port"
+	if [[ $proto == "u" ]]
+	then
+		echo " UDP"
+	else
+		echo ""
+	fi
+}
+
+function startServer {
+	# Syntax = ncCheck IP PORT [u]
+	# Get hosts IP
+	hostIP=$(ifconfig | sed -n '/eth/,/addr/p' | awk '{print $2}' | cut -d: -f2 | tail -1)
+	# Get hosts Subnet
+	hostSubnet=$(echo "$hostIP" | sed 's/\.[0-9][0-9]*$//')
+        # Get host subnet name and ports to open
+	subnetName=$(grep "$hostSubnet" stg-vlans | cut -f1)
+	# For the services we don't care about network to network, just what ports to start
+	portList=$(sed -n "/$subnetName=$/,/^$/p" stg-rules | sed '/^$/d' | grep '^[0-9]' | sort -n | uniq)
+	OIFS="$IFS"
+	IFS=/
+	echo "$portList" | while read port proto
+	do
+		if [[ $proto == udp ]]
+		then
+			protoUse=u
+		else
+			protoUse=""
+		fi
+		ncCheck $hostIP $port $protoUse &
+	done
+	IFS="$OIFS"
+}
+
+startServer
