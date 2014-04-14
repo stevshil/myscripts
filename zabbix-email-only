@@ -49,5 +49,6 @@ do
 		mid=$(echo "SELECT max(mediaid)+1 FROM media;" | mysql zabbix -u root -p$rootpw | tail -1)
 		# Create the Email setting
 		echo "INSERT INTO media (mediaid,userid,mediatypeid,sendto,active,severity) VALUES ($mid,$uid,1,'$sendto',0,52)" | mysql zabbix -u root -p$rootpw
+		echo "UPDATE ids SET nextid=$mid WHERE field_name='mediaid' AND table_name='media'" | mysql zabbix -u root -p$rootpw
 
 done <userlist
