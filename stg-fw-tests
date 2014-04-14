@@ -15,12 +15,14 @@ function ncCheck {
 	proto="$3"
 	if [[ $proto == 'u' ]]
 	then
-		options="-zu -w 3"
+                nc -uz -w3 $ip $port | grep 'succeeded' >/dev/null 2>&1
+                status=$?
 	else
-		options="-w 3"
+                options="-w3"
+                nc $options $ip $port >/dev/null 2>&1
+                status=$?
 	fi
-	nc $options $ip $port >/dev/null 2>&1
-	worked $?
+	worked $status
 	echo -n "$ip on port $port"
 	if [[ $proto == "u" ]]
 	then

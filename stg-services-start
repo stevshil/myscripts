@@ -6,7 +6,7 @@ function ncCheck {
 	proto="$3"
 	if [[ $proto == 'u' ]]
 	then
-		nc -klu $ip $port >/dev/null 2>&1
+		ncat -klu --exec '/bin/echo' $ip $port >/dev/null 2>&1
 	else
 		nc -kl $ip $port >/dev/null 2>&1
 	fi
