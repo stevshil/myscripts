@@ -133,7 +133,7 @@ CPSSRC2CORE=
 3514/tcp
 5601/tcp
 8080/tcp
-8130/tcp
+8140/tcp
 10051/tcp
 61613/tcp
 

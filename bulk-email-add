@@ -21,7 +21,7 @@ stty echo
 while read -r user
 do
 	# Get User data for 4x4 from LDAP
-	data=$(ldapsearch -b "dc=o,dc=itv,dc=net,dc=uk" -x | sed -n "/^dn: uid=$user/,/givenName/p" | egrep '(^mail|^givenName|^sn)')
+	data=$(ldapsearch -b "dc=o,dc=itv,dc=net,dc=uk" -x | sed -n "/^dn: uid=$user/,/^dn:/p" | egrep '(^mail|^givenName|^sn)')
 
 	alias="$user"
 	name=$(echo "$data" | grep '^givenName:' | sed 's/^.*: //')
