@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for x
+do
+	puppet cert sign $x && puppet cert clean $x
+done
